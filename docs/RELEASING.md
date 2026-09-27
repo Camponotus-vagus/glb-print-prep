@@ -4,7 +4,7 @@
    `CFBundleVersion` in `app/Resources/Info.plist`.
 2. Move the "Unreleased" entries in `CHANGELOG.md` under the new version and date.
 3. `make lint test app` and try `dist/GLB Print Prep.app` on a few real models.
-4. Commit, tag and push: `git tag -a v3.1.0 -m "v3.1.0" && git push --follow-tags`.
+4. Commit, tag and push: `git tag -a v1.1.0 -m "v1.1.0" && git push --follow-tags`.
 5. The **Release** workflow builds the app with bundled Node.js, zips it, packs the engine and creates a
    **draft** GitHub release with checksums. Review the notes and publish it.
 

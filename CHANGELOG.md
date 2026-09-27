@@ -5,34 +5,24 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-### Changed
-- Visual polish pass (reviewed on real screenshots in light and dark mode):
-  empty state drop zone now contains its button; smoother Log inspector (no layout flip mid-animation,
-  lazily rendered log that starts at the top); job cards show the full output name, equal-width actions,
-  cleaner stats and a readable optimization offer; status bar with icon counters and a single glass morph;
-  shorter, clearer Settings; better-framed, appearance-aware 3D thumbnails that spin on hover;
-  viewer framing, zoom limits and double-click reset.
-- Engine CPU and RAM are shown as 0–100 % of the whole Mac (CPU across all cores, RAM of physical memory).
-- New setting "Rotate thumbnails continuously" (off by default: thumbnails rotate on hover).
-- Card actions now expose proper accessibility labels and identifiers (VoiceOver previously heard "button").
+## [1.0.0] — 2026-09-27
 
-## [3.0.0] — 2026-09-27
-
-First public release as **GLB Print Prep** (previously a private tool).
+First public release.
 
 ### Added
-- Fully English UI, CLI and documentation.
-- Standalone command-line interface (`glb-print-prep`) with `--optimize`, `--detail`, `--nozzle`, `--layer`,
-  `--tolerance`, `--base`, `--cap`, `--target`, `--json` and `--preview-dir`.
-- Node.js runtime bundled inside the app.
-- Help menu and Settings links for GitHub, issue reporting and sponsorship.
-- Automated tests (engine: `node:test`; app core: Swift Testing), Biome, SwiftLint, swift-format and CI.
+- **Repair** of GLB files compressed with meshopt, mesh quantization or Draco into standard GLB, verified by
+  five independent tests before the original is moved to the Trash (always restorable).
+- **Print optimization**: adaptive triangle reduction within a measured tolerance in millimetres
+  (symmetric Hausdorff distance), derived from nozzle diameter and layer height, with automatic detection of
+  the round base for real-world scale, fin removal and protection against non-manifold pinches.
+- Native macOS app (SwiftUI, RealityKit, Liquid Glass): drag & drop of files and folders, parallel batch
+  processing on Apple Silicon, live progress with ETA and CPU/RAM heartbeat, 3D thumbnails and viewer,
+  "keep only optimized versions" mode, Settings for printer profile and detail level. Node.js is bundled.
+- Cross-platform command-line interface (`glb-print-prep`) with `--optimize`, `--detail`, `--nozzle`,
+  `--layer`, `--tolerance`, `--base`, `--cap`, `--target`, `--json` and `--preview-dir`.
+- Support links for GitHub Sponsors and Ko-fi in the Help menu and Settings.
+- Tests (engine: `node:test`; app core: Swift Testing), Biome, SwiftLint, swift-format and CI on
+  macOS, Linux and Windows.
 
-### Carried over from the private versions
-- Meshopt / quantization / Draco repair with five independent checks and restorable Trash handling.
-- Adaptive print optimization within a measured tolerance, base detection, fin removal and pinch protection.
-- Folder import, "keep only optimized versions", live progress with heartbeat, RealityKit previews,
-  Liquid Glass UI and Icon Composer icon.
-
-[Unreleased]: https://github.com/Camponotus-vagus/glb-print-prep/compare/v3.0.0...HEAD
-[3.0.0]: https://github.com/Camponotus-vagus/glb-print-prep/releases/tag/v3.0.0
+[Unreleased]: https://github.com/Camponotus-vagus/glb-print-prep/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Camponotus-vagus/glb-print-prep/releases/tag/v1.0.0

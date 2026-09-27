@@ -1,6 +1,6 @@
 # Benchmarks
 
-Measured on a Mac mini M1 (16 GB), engine 3.0.0, "high" detail (0.2 mm nozzle, 0.08 mm layers →
+Measured on a Mac mini M1 (16 GB), engine 1.0.0, "high" detail (0.2 mm nozzle, 0.08 mm layers →
 0.02 mm tolerance). Times include validation, the final deviation measurement and writing to disk.
 
 ## Print optimization

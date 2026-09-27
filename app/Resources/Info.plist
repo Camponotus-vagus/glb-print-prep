@@ -7,8 +7,8 @@
 	<key>CFBundleExecutable</key><string>GLBPrintPrep</string>
 	<key>CFBundleIdentifier</key><string>io.github.camponotus-vagus.glb-print-prep</string>
 	<key>CFBundlePackageType</key><string>APPL</string>
-	<key>CFBundleShortVersionString</key><string>3.0.0</string>
-	<key>CFBundleVersion</key><string>30</string>
+	<key>CFBundleShortVersionString</key><string>1.0.0</string>
+	<key>CFBundleVersion</key><string>1</string>
 	<key>CFBundleIconName</key><string>AppIcon</string>
 	<key>CFBundleIconFile</key><string>AppIcon</string>
 	<key>LSMinimumSystemVersion</key><string>26.0</string>

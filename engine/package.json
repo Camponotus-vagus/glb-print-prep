@@ -1,6 +1,6 @@
 {
   "name": "glb-print-prep",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "description": "Repair meshopt/Draco-compressed GLB files and reduce triangles within a measured print tolerance.",
   "keywords": [
     "glb",
