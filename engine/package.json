@@ -1,0 +1,57 @@
+{
+  "name": "glb-print-prep",
+  "version": "3.0.0",
+  "description": "Repair meshopt/Draco-compressed GLB files and reduce triangles within a measured print tolerance.",
+  "keywords": [
+    "glb",
+    "gltf",
+    "meshopt",
+    "draco",
+    "3d-printing",
+    "mesh-simplification",
+    "bambu-lab"
+  ],
+  "homepage": "https://github.com/Camponotus-vagus/glb-print-prep#readme",
+  "bugs": "https://github.com/Camponotus-vagus/glb-print-prep/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Camponotus-vagus/glb-print-prep.git",
+    "directory": "engine"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/Camponotus-vagus"
+    }
+  ],
+  "license": "MIT",
+  "author": "Francesco Simone Mensa",
+  "type": "module",
+  "exports": "./src/index.mjs",
+  "bin": {
+    "glb-print-prep": "bin/glb-print-prep.mjs"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test --test-concurrency=1 \"test/*.test.mjs\"",
+    "lint": "biome ci .",
+    "format": "biome check --write ."
+  },
+  "dependencies": {
+    "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/extensions": "^4.5.0",
+    "@gltf-transform/functions": "^4.5.0",
+    "draco3dgltf": "^1.5.7",
+    "gltf-validator": "^2.0.0-dev.3.10",
+    "meshoptimizer": "^1.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14"
+  }
+}

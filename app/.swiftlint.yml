@@ -1,0 +1,33 @@
+# SwiftLint — run from app/: `swiftlint --strict`
+included:
+  - Sources
+  - Tests
+excluded:
+  - .build
+opt_in_rules:
+  - empty_count
+  - first_where
+  - modifier_order
+  - redundant_nil_coalescing
+  - sorted_imports
+  - toggle_bool
+disabled_rules:
+  - identifier_name        # short math/geometry names (a, b, t, uv…) are idiomatic here
+  - todo
+  - optional_data_string_conversion  # LineStream decodes lossy UTF-8 on purpose
+  - cyclomatic_complexity  # the glTF parser and event switch are intentionally flat
+  - function_body_length
+  - type_body_length
+  - file_length
+  - large_tuple
+  - opening_brace          # handled by swift-format
+  - trailing_comma         # handled by swift-format
+line_length:
+  warning: 140
+  error: 180
+  ignores_comments: true
+  ignores_urls: true
+nesting:
+  type_level: 2
+analyzer_rules:
+  - unused_import

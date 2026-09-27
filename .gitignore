@@ -1,0 +1,29 @@
+# Local assistant notes (kept out of the repository)
+CLAUDE.md
+.claude/
+
+# Dependencies and caches
+node_modules/
+.cache/
+*.tgz
+
+# Build outputs
+.build/
+build/
+dist/
+DerivedData/
+*.xcodeproj/xcuserdata/
+.swiftpm/
+
+# Engine temporary files
+*.partial
+
+# Test models (never commit third-party models)
+*.glb
+!docs/**/*.glb
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+*.swp

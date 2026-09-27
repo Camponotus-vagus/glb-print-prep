@@ -1,0 +1,44 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a problem! Please never attach models you are not allowed to share.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Which feature?
+      options: [Repair, Print optimization, 3D preview, CLI, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: In the app, open the Log panel (toolbar) and paste the relevant lines. For the CLI, paste the output.
+      render: text
+  - type: input
+    id: model
+    attributes:
+      label: Where does the model come from?
+      placeholder: e.g. Tripo, Meshy, Hunyuan3D, exported from Blender…
+  - type: input
+    id: version
+    attributes:
+      label: App / engine version
+      placeholder: e.g. 3.0.0
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac model
+      placeholder: e.g. macOS 26.1, MacBook Air M2 16 GB

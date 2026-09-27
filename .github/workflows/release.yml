@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: engine/package-lock.json
+
+      - name: Engine checks
+        working-directory: engine
+        run: |
+          npm ci
+          npx biome ci .
+          npm test
+
+      - name: Build app (bundled Node.js, ad-hoc signed)
+        run: app/scripts/build-app.sh
+
+      - name: Package
+        id: package
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ZIP="dist/GLB-Print-Prep-${VERSION}-macOS-arm64.zip"
+          ditto -c -k --sequesterRsrc --keepParent "dist/GLB Print Prep.app" "$ZIP"
+          (cd engine && npm pack --pack-destination ../dist)
+          shasum -a 256 dist/*.zip dist/*.tgz > dist/SHA256SUMS.txt
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            dist/*.zip
+            dist/*.tgz
+            dist/SHA256SUMS.txt
