@@ -1,4 +1,4 @@
-# GLB Print Prep — common tasks. Run `make help`.
+# GLB Print Prep: common tasks. Run `make help`.
 .DEFAULT_GOAL := help
 .PHONY: help setup lint format test test-engine test-app build app app-dev clean
 

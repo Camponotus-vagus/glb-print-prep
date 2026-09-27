@@ -434,7 +434,7 @@ final class Store {
         if process.terminationReason == .uncaughtSignal {
             if let tmp = job.tmpPath { try? FileManager.default.removeItem(atPath: tmp) }
             job.state = .cancelled
-            job.stepLabel = job.kind.isOptimize ? "Cancelled — no file written" : "Cancelled — original untouched"
+            job.stepLabel = job.kind.isOptimize ? "Cancelled, no file written" : "Cancelled, original untouched"
             job.finishedAt = .now
             appendLog("■ \(job.name): cancelled")
         } else if let result {

@@ -1,4 +1,4 @@
-# SwiftLint — run from app/: `swiftlint --strict`
+# SwiftLint. Run from app/: `swiftlint --strict`
 included:
   - Sources
   - Tests

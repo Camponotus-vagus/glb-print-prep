@@ -231,7 +231,7 @@ export async function optimizeFile(input, { io, reporter, previewDir }, { baseMM
   const reason = within ? '' : nFinal >= hi ? ' (not reachable within the triangle cap)' : ' (slightly exceeded)';
   pass(
     'deviation',
-    `Deviation at real size (base ${baseMM} mm): max ${dev.max.toFixed(3)} mm, 99% of the surface ≤ ${dev.p99.toFixed(3)} mm, mean ${dev.mean.toFixed(4)} mm — tolerance ${toleranceMM} mm${reason}`,
+    `Deviation at real size (base ${baseMM} mm): max ${dev.max.toFixed(3)} mm, 99% of the surface ≤ ${dev.p99.toFixed(3)} mm, mean ${dev.mean.toFixed(4)} mm (tolerance ${toleranceMM} mm)${reason}`,
   );
 
   await T.step('disk');

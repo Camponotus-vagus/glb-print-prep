@@ -63,7 +63,7 @@ export function jsonTriangleCount(json) {
 }
 
 /**
- * Structural problems that make simple GLB readers fail — e.g. the meshopt "fallback" buffer
+ * Structural problems that make simple GLB readers fail, for example the meshopt "fallback" buffer
  * without data, which produces "Invalid byteLength" errors in viewers without a meshopt decoder.
  */
 export function structuralCheck(bytes) {

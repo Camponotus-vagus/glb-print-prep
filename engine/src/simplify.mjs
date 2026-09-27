@@ -1,6 +1,6 @@
 // Triangle reduction for 3D printing.
 //
-// Algorithm: meshoptimizer `simplifyWithUpdate` — edge collapse driven by Quadric Error Metrics,
+// Algorithm: meshoptimizer `simplifyWithUpdate`: edge collapse driven by Quadric Error Metrics,
 // attribute-aware, with optimal vertex placement. On Tripo models (1.9 M → 900k triangles) it halves
 // the mean error of the classic `simplify` at the same speed, without introducing topological
 // defects. After simplification we remove rare "fins" (pairs of coincident, opposite triangles) and

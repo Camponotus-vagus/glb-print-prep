@@ -82,7 +82,7 @@ struct ModelThumbnail: View {
 }
 
 /// Full viewer: the model fills the window (under the title bar too); controls live in the
-/// system toolbar, which is already Liquid Glass — no custom glass on top.
+/// system toolbar, which is already Liquid Glass, so no custom glass on top.
 struct ModelViewerWindow: View {
     let target: ViewerTarget
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -242,7 +242,7 @@ struct ModelViewerWindow: View {
                     Label("Reset View", systemImage: "arrow.counterclockwise")
                 }
                 .keyboardShortcut("0", modifiers: .command)
-                .help("Reset View (⌘0) — or double-click the model")
+                .help("Reset View (⌘0), or double-click the model")
                 .accessibilityIdentifier("viewer.reset")
                 .disabled(info == nil)
             }
