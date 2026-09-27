@@ -25,20 +25,23 @@ struct GLBPrintPrepApp: App {
                 .environment(store)
                 .frame(minWidth: 860, minHeight: 620)
         }
+        .defaultSize(width: 980, height: 820)  // room for a few result cards on first launch
         .windowToolbarStyle(.unified)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Add Files or Folders…") { store.showImporter = true }
                     .keyboardShortcut("o")
             }
+            // These only open web pages, so no ellipses (HIG: "…" means more input is needed).
             CommandGroup(replacing: .help) {
                 Button("GLB Print Prep on GitHub") { openURL(ProjectLinks.repository) }
-                Button("Report an Issue…") { openURL(ProjectLinks.issues) }
-                Button("Check for Updates…") { openURL(ProjectLinks.releases) }
+                Button("Latest Releases on GitHub") { openURL(ProjectLinks.releases) }
                 Divider()
-                Button("Support GLB Print Prep (GitHub Sponsors)…") { openURL(ProjectLinks.githubSponsors) }
+                Button("Report an Issue") { openURL(ProjectLinks.issues) }
+                Divider()
+                Button("Sponsor GLB Print Prep on GitHub") { openURL(ProjectLinks.githubSponsors) }
                 if let koFi = ProjectLinks.koFi {
-                    Button("Buy Me a Coffee (Ko-fi)…") { openURL(koFi) }
+                    Button("Buy Me a Coffee on Ko-fi") { openURL(koFi) }
                 }
             }
         }
@@ -60,6 +63,18 @@ struct GLBPrintPrepApp: App {
 
 /// Receives files dropped on the Dock icon / Finder or opened with "Open With".
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    /// Testing hook: `-GPPForceAppearance dark|light` (launch argument) forces the appearance; no-op when absent.
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        let forced = UserDefaults.standard.string(forKey: "GPPForceAppearance")
+        MainActor.assumeIsolated {
+            switch forced {
+            case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
+            case "light": NSApp.appearance = NSAppearance(named: .aqua)
+            default: break
+            }
+        }
+    }
+
     func application(_ application: NSApplication, open urls: [URL]) {
         MainActor.assumeIsolated { Store.shared.add(urls) }
     }

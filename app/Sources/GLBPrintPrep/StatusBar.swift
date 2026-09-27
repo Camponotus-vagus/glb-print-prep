@@ -10,79 +10,125 @@ struct StatusBar: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Namespace private var glass
 
-    var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.5)) { ctx in
-            let running = store.isRunning
-            let c = store.counts
-            let f = store.batchFraction
-            GlassEffectContainer(spacing: 14) {
-                HStack(spacing: 10) {
-                    summary(running: running, c: c, f: f, now: ctx.date)
-                        .padding(.horizontal, 18).padding(.vertical, 11)
-                        .glassEffect(.regular, in: .capsule)
-                        .glassEffectID("summary", in: glass)
+    /// Diameter of the action button. The summary capsule uses the same minimum height,
+    /// so the two glass shapes share top, bottom and centre line.
+    private let barHeight: CGFloat = 56
+    private let gap: CGFloat = 12
 
-                    // Primary action: morphs between "Stop" and "Clear List"
-                    if running {
-                        actionButton("Stop All", systemImage: "stop.fill", tint: .red) { store.cancelAll() }
-                            .keyboardShortcut(".", modifiers: .command)
-                            .help("Stops processing: originals stay untouched (⌘.)")
-                            .glassEffectID("stop", in: glass)
-                    } else {
-                        actionButton("Clear List", systemImage: "checkmark", tint: nil) {
-                            withAnimation { store.clearFinished() }
-                        }
-                        .help("Removes finished files from the list (files on disk are not touched)")
-                        .glassEffectID("clear", in: glass)
+    var body: some View {
+        let running = store.isRunning
+        // The container spacing equals the gap: the shapes stay separate at rest
+        // but morph as one layer when the action button changes.
+        GlassEffectContainer(spacing: gap) {
+            HStack(spacing: gap) {
+                // Only the text needs a clock. The schedule is paused once the batch ends,
+                // so a finished list is not re-rendered twice a second; glass stays outside it.
+                TimelineView(.animation(minimumInterval: 0.5, paused: !running)) { ctx in
+                    summary(running: running, now: ctx.date)
+                }
+                .padding(.leading, 12).padding(.trailing, 20).padding(.vertical, 8)
+                .frame(maxWidth: 720, minHeight: barHeight)
+                .glassEffect(.regular, in: .capsule)
+                .glassEffectID("summary", in: glass)
+
+                // Primary action: one glass circle that morphs between "Stop All" and "Clear List".
+                if running {
+                    actionButton("Stop All", systemImage: "stop.fill", tint: .red) { store.cancelAll() }
+                        .keyboardShortcut(".", modifiers: .command)
+                        .help("Stop all processing (⌘.). Originals stay untouched.")
+                        .accessibilityHint("Stops every file in the queue. Originals stay untouched.")
+                        .accessibilityIdentifier("status.stop")
+                } else {
+                    actionButton("Clear List", systemImage: "xmark", tint: nil) {
+                        withAnimation(reduceMotion ? nil : .smooth) { store.clearFinished() }
                     }
+                    .help("Remove finished files from the list. Files on disk are not touched.")
+                    .accessibilityHint("Removes finished files from the list. Files on disk are not touched.")
+                    .accessibilityIdentifier("status.clear")
                 }
             }
-            .animation(reduceMotion ? nil : .smooth(duration: 0.45), value: running)
         }
+        // Breathing room below the scroll-edge line of the bar.
+        .padding(.top, 8)
+        .animation(reduceMotion ? nil : .smooth(duration: 0.45), value: running)
     }
 
-    @ViewBuilder
-    private func summary(
-        running: Bool, c: (ok: Int, skipped: Int, failed: Int, done: Int, total: Int), f: Double, now: Date
-    ) -> some View {
-        HStack(spacing: 14) {
+    private func summary(running: Bool, now: Date) -> some View {
+        let c = store.counts
+        let f = store.batchFraction
+        let percent = Int((f * 100).rounded(.down))
+        return HStack(spacing: 12) {
             ZStack {
                 if running {
-                    ProgressView(value: f).progressViewStyle(.circular).controlSize(.small)
+                    // Single progress indicator: the percentage is spelled out next to "Processing".
+                    ProgressView(value: f).progressViewStyle(.circular).controlSize(.regular)
+                        .accessibilityHidden(true)
                 } else {
                     Image(systemName: c.failed > 0 ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                         .font(.title2)
                         .foregroundStyle(c.failed > 0 ? Color.orange : Color.green)
                         .transition(.scale.combined(with: .opacity))
+                        .accessibilityLabel(c.failed > 0 ? "Finished with errors" : "Finished")
                 }
             }
-            .frame(width: 28, height: 28)
+            .frame(width: 32, height: 32)
 
-            VStack(alignment: .leading, spacing: 5) {
+            // Two lines in both states, so the capsule never changes height.
+            VStack(alignment: .leading, spacing: 3) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(running ? "Processing" : "Done").font(.headline)
-                    Text(f, format: .percent.precision(.fractionLength(0)))
-                        .font(.headline.monospacedDigit()).foregroundStyle(.secondary)
-                        .contentTransition(.numericText())
+                    if running {
+                        Text("Processing").font(.headline)
+                        Text("\(percent)%")
+                            .font(.headline.monospacedDigit()).foregroundStyle(.secondary)
+                            .contentTransition(.numericText(value: Double(percent)))
+                            .animation(reduceMotion ? nil : .snappy, value: percent)
+                    } else {
+                        Text("Done").font(.headline)
+                        Text(
+                            (store.jobs.count > c.total ? "Last batch: " : "")
+                                + "\(c.total) \(c.total == 1 ? "file" : "files") in \(fmt(store.batchElapsed))"
+                        )
+                        .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                    }
                     Spacer(minLength: 8)
                     if running { Pulse(now: now) }
                 }
-                if running { ProgressView(value: f).progressViewStyle(.linear) }
+                .lineLimit(1)
+
                 HStack(spacing: 14) {
-                    Text("\(c.done) of \(c.total) files")
-                    Text("Elapsed \(fmt(store.batchElapsed))")
-                    if running { Text("Remaining " + (store.etaSmoothed.map { "~" + fmt($0) } ?? "estimating…")) }
-                    Text("✓ \(c.ok)   – \(c.skipped)   ✗ \(c.failed)")
-                        .accessibilityLabel("\(c.ok) done, \(c.skipped) already fine, \(c.failed) errors")
+                    if running {
+                        // Drops the least important parts first when the window is narrow.
+                        ViewThatFits(in: .horizontal) {
+                            Text(progressLine(c, full: true))
+                            Text(progressLine(c, full: false))
+                            Text("\(c.done)/\(c.total)")
+                        }
+                        .layoutPriority(-1)
+                    }
+                    BatchCounts(ok: c.ok, skipped: c.skipped, failed: c.failed)
                 }
                 .font(.callout.monospacedDigit())
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
             }
         }
-        .frame(maxWidth: 720)
     }
 
-    /// Custom control with interactive glass (reacts to pointer and clicks like system buttons).
+    private func progressLine(_ c: (ok: Int, skipped: Int, failed: Int, done: Int, total: Int), full: Bool)
+        -> String
+    {
+        let remaining: String
+        if let eta = store.etaSmoothed {
+            remaining = eta < 1 ? "finishing…" : "about \(fmt(eta)) left"
+        } else {
+            remaining = "estimating…"
+        }
+        let files = "\(c.done) of \(c.total) files"
+        return full
+            ? "\(files) · \(fmt(store.batchElapsed)) elapsed · \(remaining)" : "\(files) · \(remaining)"
+    }
+
+    /// Circular control with interactive glass (reacts to pointer and clicks like system buttons).
     private func actionButton(_ title: String, systemImage: String, tint: Color?, action: @escaping () -> Void)
         -> some View
     {
@@ -90,12 +136,39 @@ struct StatusBar: View {
             Image(systemName: systemImage)
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(tint == nil ? AnyShapeStyle(.primary) : AnyShapeStyle(.white))
-                .frame(width: 52, height: 52)
+                .frame(width: barHeight, height: barHeight)
                 .contentShape(.circle)
         }
         .buttonStyle(.plain)
         .glassEffect(tint.map { Glass.regular.tint($0).interactive() } ?? .regular.interactive(), in: .circle)
+        .glassEffectID("action", in: glass)
         .accessibilityLabel(title)
+    }
+}
+
+/// Batch outcome counts as SF Symbols with numbers (repaired / already fine / failed).
+private struct BatchCounts: View {
+    let ok: Int
+    let skipped: Int
+    let failed: Int
+
+    var body: some View {
+        HStack(spacing: 12) {
+            item(ok, symbol: "checkmark.circle", tint: ok > 0 ? .green : .secondary, help: "Repaired and verified")
+            item(skipped, symbol: "equal.circle", tint: .secondary, help: "Already fine: no repair needed")
+            item(failed, symbol: "xmark.circle", tint: failed > 0 ? .red : .secondary, help: "Failed or cancelled")
+        }
+        .fixedSize()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(ok) repaired, \(skipped) already fine, \(failed) failed")
+    }
+
+    private func item(_ n: Int, symbol: String, tint: Color, help: String) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: symbol).foregroundStyle(tint)
+            Text(n, format: .number).contentTransition(.numericText(value: Double(n)))
+        }
+        .help(help)
     }
 }
 
@@ -111,6 +184,8 @@ struct Pulse: View {
         let silence = jobs.map { now.timeIntervalSince($0.lastEventAt) }.min() ?? 0
         let alive = cpu > 5 || silence < 3
         let color: Color = alive ? .green : (silence < 20 ? .orange : .red)
+        let usage: String? =
+            mem > 0 ? "CPU \(Int(cpu.rounded()))% · \(Int64(mem).formatted(.byteCount(style: .memory)))" : nil
         HStack(spacing: 6) {
             Circle().fill(color).frame(width: 8, height: 8)
                 .phaseAnimator([1.0, 0.4]) { v, p in
@@ -118,15 +193,16 @@ struct Pulse: View {
                 } animation: { _ in
                     .easeInOut(duration: 0.6)
                 }
-            Text(
-                mem > 0
-                    ? "CPU \(Int(cpu.rounded()))% · \(Int64(mem).formatted(.byteCount(style: .memory)))" : "starting…"
-            )
-            .font(.caption.monospacedDigit())
-            .foregroundStyle(.secondary)
+            // Fixed minimum width, trailing-aligned: changing CPU/RAM digits don't shift the row.
+            Text(usage ?? "starting…")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.secondary)
+                .frame(minWidth: 124, alignment: .trailing)
         }
-        .accessibilityElement(children: .combine)
+        .fixedSize()
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(alive ? "Engine active" : "Engine idle for \(Int(silence)) seconds")
+        .accessibilityValue(usage ?? "Starting")
         .help(alive ? "The engine is working (real CPU use of its processes)" : "No recent activity")
     }
 }

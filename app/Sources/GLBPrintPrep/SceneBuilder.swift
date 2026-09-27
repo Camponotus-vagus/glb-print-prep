@@ -20,7 +20,10 @@ enum SceneBuilder {
         for (pi, p) in m.prims.enumerated() {
             let entity: ModelEntity
             if p.mode == 0 {
-                entity = try await pointCloud(p, radius: diag * 0.0022)
+                // Octahedron size follows point density (≈ half the mean spacing on a surface), so dense
+                // clouds read as a surface instead of overlapping noise.
+                let density = 0.25 / max(Float(p.positions.count).squareRoot(), 1)
+                entity = try await pointCloud(p, radius: diag * min(0.0022, max(0.0006, density)))
             } else if p.mode == 4 {
                 var d = MeshDescriptor(name: "prim\(pi)")
                 d.positions = MeshBuffers.Positions(p.positions)
@@ -49,6 +52,30 @@ enum SceneBuilder {
         model.scale = SIMD3(repeating: s)
         model.position = -center * s
         return root
+    }
+
+    /// Camera distance that keeps a model normalised by `makeEntity` fully in view while it spins about
+    /// the vertical axis. It fits the smallest vertical cylinder around the vertices (not the bounding
+    /// sphere, which leaves tall figurines small) for a camera raised by `elevation` radians and a
+    /// view whose half-width / half-height tangents are given.
+    static func fittingDistance(
+        _ m: LoadedModelData, tanHalfWidth: Float, tanHalfHeight: Float, elevation: Float = 0, margin: Float = 1.06
+    ) -> Float {
+        let center = (m.boundsMin + m.boundsMax) / 2
+        let s = 1 / max((m.boundsMax - m.boundsMin).max(), 1e-6)
+        var r2: Float = 0
+        for p in m.prims where p.mode == 0 || p.mode == 4 {
+            for v in p.positions {
+                let dx = v.x - center.x, dz = v.z - center.z
+                r2 = max(r2, dx * dx + dz * dz)
+            }
+        }
+        let r = max(r2.squareRoot() * s, 0.05)
+        let h = (m.boundsMax.y - m.boundsMin.y) / 2 * s
+        let halfW = atan(max(tanHalfWidth, 0.01)), tanV = max(tanHalfHeight, 0.01)
+        let byWidth = r / sin(halfW)
+        let byHeight = r * cos(elevation) + (h * cos(elevation) + r * sin(elevation)) / tanV
+        return max(byWidth, byHeight, 0.2) * margin
     }
 
     private static func texture(_ img: SendableImage?, _ semantic: TextureResource.Semantic) async throws
@@ -101,8 +128,9 @@ enum SceneBuilder {
         d.primitives = .triangles(idx)
         let mesh = try await MeshResource(from: [d])
         var mat = PhysicallyBasedMaterial()
-        mat.baseColor = .init(tint: NSColor(srgbRed: 0.18, green: 0.62, blue: 0.86, alpha: 1))
-        mat.roughness = .init(floatLiteral: 0.55)
+        // Neutral slate: readable on light and dark backdrops, less noisy than saturated blue.
+        mat.baseColor = .init(tint: NSColor(srgbRed: 0.34, green: 0.42, blue: 0.54, alpha: 1))
+        mat.roughness = .init(floatLiteral: 0.7)
         mat.metallic = .init(floatLiteral: 0)
         return ModelEntity(mesh: mesh, materials: [mat])
     }
@@ -134,8 +162,9 @@ enum SceneBuilder {
             colors: [
                 CGColor(srgbRed: 0.98, green: 0.98, blue: 1.0, alpha: 1),
                 CGColor(srgbRed: 0.72, green: 0.76, blue: 0.82, alpha: 1),
-                CGColor(srgbRed: 0.30, green: 0.31, blue: 0.34, alpha: 1),
-                CGColor(srgbRed: 0.16, green: 0.16, blue: 0.18, alpha: 1),
+                // lower hemisphere lifted a little so undersides / dark textures aren't crushed
+                CGColor(srgbRed: 0.38, green: 0.39, blue: 0.42, alpha: 1),
+                CGColor(srgbRed: 0.24, green: 0.24, blue: 0.26, alpha: 1),
             ] as CFArray, locations: [0, 0.42, 0.55, 1])!
         ctx.drawLinearGradient(grad, start: CGPoint(x: 0, y: h), end: .zero, options: [])
         // two bright "softboxes"
@@ -149,16 +178,17 @@ enum SceneBuilder {
     }
 
     /// Adds image-based and directional light to `root` and connects them to every model.
-    static func addLighting(to root: Entity, model: Entity) async {
+    /// `exposure` is the IBL intensity exponent (each +1 doubles it).
+    static func addLighting(to root: Entity, model: Entity, exposure: Float = 0.8) async {
         if let env = try? await environment() {
             let ibl = Entity()
-            ibl.components.set(ImageBasedLightComponent(source: .single(env), intensityExponent: 0.6))
+            ibl.components.set(ImageBasedLightComponent(source: .single(env), intensityExponent: exposure))
             root.addChild(ibl)
             model.components.set(ImageBasedLightReceiverComponent(imageBasedLight: ibl))
             for e in model.descendants { e.components.set(ImageBasedLightReceiverComponent(imageBasedLight: ibl)) }
         }
         let sun = DirectionalLight()
-        sun.light.intensity = 2500
+        sun.light.intensity = 3000
         sun.look(at: .zero, from: [1.2, 2, 1.5], relativeTo: nil)
         root.addChild(sun)
     }

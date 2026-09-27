@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- Visual polish pass (reviewed on real screenshots in light and dark mode):
+  empty state drop zone now contains its button; smoother Log inspector (no layout flip mid-animation,
+  lazily rendered log that starts at the top); job cards show the full output name, equal-width actions,
+  cleaner stats and a readable optimization offer; status bar with icon counters and a single glass morph;
+  shorter, clearer Settings; better-framed, appearance-aware 3D thumbnails that spin on hover;
+  viewer framing, zoom limits and double-click reset.
+- Card actions now expose proper accessibility labels and identifiers (VoiceOver previously heard "button").
+
 ## [3.0.0] — 2026-09-27
 
 First public release as **GLB Print Prep** (previously a private tool).
