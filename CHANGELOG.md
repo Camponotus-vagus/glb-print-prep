@@ -12,6 +12,8 @@ All notable changes to this project are documented here. The format follows
   cleaner stats and a readable optimization offer; status bar with icon counters and a single glass morph;
   shorter, clearer Settings; better-framed, appearance-aware 3D thumbnails that spin on hover;
   viewer framing, zoom limits and double-click reset.
+- Engine CPU and RAM are shown as 0–100 % of the whole Mac (CPU across all cores, RAM of physical memory).
+- New setting "Rotate thumbnails continuously" (off by default: thumbnails rotate on hover).
 - Card actions now expose proper accessibility labels and identifiers (VoiceOver previously heard "button").
 
 ## [3.0.0] — 2026-09-27

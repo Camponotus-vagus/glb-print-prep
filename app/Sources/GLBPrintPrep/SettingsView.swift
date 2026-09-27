@@ -64,6 +64,16 @@ struct SettingsView: View {
                 Text("Repair")
             }
             Section {
+                Toggle(isOn: $store.alwaysSpinThumbnails) {
+                    Text("Rotate thumbnails continuously")
+                    Text(
+                        "When off, a thumbnail rotates only while the pointer is over it. "
+                            + "Continuous rotation uses more power.")
+                }
+            } header: {
+                Text("Previews")
+            }
+            Section {
                 supportLink("Sponsor on GitHub", systemImage: "heart", url: ProjectLinks.githubSponsors)
                 if let koFi = ProjectLinks.koFi {
                     supportLink("Buy me a coffee on Ko-fi", systemImage: "cup.and.saucer", url: koFi)
@@ -81,7 +91,7 @@ struct SettingsView: View {
         .formStyle(.grouped)
         // Fixed width; the height follows the content up to a cap, beyond which the form scrolls.
         .frame(width: 560)
-        .frame(minHeight: 760, idealHeight: 780, maxHeight: 900)
+        .frame(minHeight: 920, idealHeight: 920, maxHeight: 1000)
         .scrollBounceBehavior(.basedOnSize)
     }
 

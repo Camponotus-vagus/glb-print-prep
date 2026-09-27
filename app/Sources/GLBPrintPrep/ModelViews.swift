@@ -6,11 +6,13 @@ import UniformTypeIdentifiers
 // MARK: - 3D previews (RealityKit)
 
 /// Lightweight thumbnail: loads the decimated copy (~50k triangles) once and frames it to fit.
-/// It turns only while the pointer is over it in an active window (never with Reduce Motion):
+/// By default it turns only while the pointer is over it in an active window (Settings ▸ "Rotate
+/// thumbnails continuously" makes it always turn; never with Reduce Motion):
 /// a column of always-spinning RealityViews redraws every frame and makes other animations
 /// in the window (e.g. the inspector) stutter.
 struct ModelThumbnail: View {
     let url: URL
+    @Environment(Store.self) private var store
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.appearsActive) private var appearsActive
     @State private var failed: String?
@@ -20,7 +22,9 @@ struct ModelThumbnail: View {
     private static let fov: Float = 30
     private static let elevation: Float = 0.3  // ≈ 17°, looking slightly down on the model
 
-    private var spinning: Bool { loaded && hovering && appearsActive && !reduceMotion }
+    private var spinning: Bool {
+        loaded && (hovering || store.alwaysSpinThumbnails) && appearsActive && !reduceMotion
+    }
 
     var body: some View {
         RealityView { content in

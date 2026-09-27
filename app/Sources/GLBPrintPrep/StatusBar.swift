@@ -179,13 +179,14 @@ struct Pulse: View {
     let now: Date
     var body: some View {
         let jobs = store.runningJobs
-        let cpu = jobs.reduce(0) { $0 + $1.cpuPercent }
-        let mem = jobs.reduce(UInt64(0)) { $0 + $1.memoryBytes }
+        let cpu = min(100, jobs.reduce(0) { $0 + $1.cpuPercent })
+        let memBytes = jobs.reduce(UInt64(0)) { $0 + $1.memoryBytes }
+        let mem = Store.memoryShare(memBytes)
         let silence = jobs.map { now.timeIntervalSince($0.lastEventAt) }.min() ?? 0
         let alive = cpu > 5 || silence < 3
         let color: Color = alive ? .green : (silence < 20 ? .orange : .red)
         let usage: String? =
-            mem > 0 ? "CPU \(Int(cpu.rounded()))% · \(Int64(mem).formatted(.byteCount(style: .memory)))" : nil
+            memBytes > 0 ? "CPU \(percentText(cpu)) · RAM \(percentText(mem))" : nil
         HStack(spacing: 6) {
             Circle().fill(color).frame(width: 8, height: 8)
                 .phaseAnimator([1.0, 0.4]) { v, p in
@@ -197,13 +198,17 @@ struct Pulse: View {
             Text(usage ?? "starting…")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
-                .frame(minWidth: 124, alignment: .trailing)
+                .frame(minWidth: 118, alignment: .trailing)
         }
         .fixedSize()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(alive ? "Engine active" : "Engine idle for \(Int(silence)) seconds")
         .accessibilityValue(usage ?? "Starting")
-        .help(alive ? "The engine is working (real CPU use of its processes)" : "No recent activity")
+        .help(
+            alive
+                ? "The engine is working. CPU: share of the Mac's total processing power (all cores); "
+                    + "RAM: share of its memory (\(memBytes.formatted(.byteCount(style: .memory))))."
+                : "No recent activity")
     }
 }
 
@@ -217,8 +222,9 @@ struct HeartbeatRow: View {
         HStack(spacing: 12) {
             Label(job.pid.map { "pid \($0)" } ?? "—", systemImage: "cpu")
             if job.memoryBytes > 0 {
-                Text("CPU \(Int(job.cpuPercent.rounded()))%")
-                Text(Int64(job.memoryBytes), format: .byteCount(style: .memory))
+                Text("CPU \(percentText(job.cpuPercent))")
+                Text("RAM \(percentText(job.memoryPercent))")
+                    .help(Int64(job.memoryBytes).formatted(.byteCount(style: .memory)))
             } else {
                 Text("CPU —"); Text("RAM —")
             }
@@ -228,4 +234,10 @@ struct HeartbeatRow: View {
         .font(.caption.monospacedDigit())
         .foregroundStyle(.secondary)
     }
+}
+
+/// 0–100 → "37%"; small non-zero values read "<1%" rather than a misleading "0%".
+func percentText(_ value: Double) -> String {
+    if value > 0 && value < 1 { return "<1%" }
+    return "\(Int(value.rounded()))%"
 }

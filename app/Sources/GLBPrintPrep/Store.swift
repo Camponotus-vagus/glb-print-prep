@@ -49,8 +49,11 @@ final class FileJob: Identifiable {
     var lastEventAt = Date()
     // process telemetry (heartbeat)
     var pid: pid_t?
+    /// Share of the whole Mac's CPU capacity (all cores together), 0–100.
     var cpuPercent: Double = 0
     var memoryBytes: UInt64 = 0
+    /// Share of the Mac's physical memory, 0–100.
+    var memoryPercent: Double { Store.memoryShare(memoryBytes) }
     fileprivate var lastCPUTime: UInt64 = 0
     fileprivate var lastSampleAt: Date?
     fileprivate var tmpPath: String?
@@ -114,6 +117,10 @@ final class Store {
     }
     var autoReduce: Bool = Store.stored("autoReduce", false) {
         didSet { UserDefaults.standard.set(autoReduce, forKey: "autoReduce") }
+    }
+    /// Thumbnails rotate only on hover by default (cheaper); this makes them rotate all the time.
+    var alwaysSpinThumbnails: Bool = Store.stored("alwaysSpinThumbnails", false) {
+        didSet { UserDefaults.standard.set(alwaysSpinThumbnails, forKey: "alwaysSpinThumbnails") }
     }
     /// Default base diameter (mm): gives the miniature its real-world scale.
     var baseMM: Double = Store.stored("baseMM", 32.0) {
@@ -597,7 +604,10 @@ final class Store {
             let now = Date.now
             if let last = job.lastSampleAt, job.lastCPUTime > 0 {
                 let cpuNs = Double(usage.cpuNs &- job.lastCPUTime)
-                job.cpuPercent = max(0, cpuNs / (now.timeIntervalSince(last) * 1e9) * 100)
+                // CPU time / wall time counts one core as 100 %: divide by the core count so the value is
+                // a share of the whole machine, like Activity Monitor's "% CPU" divided by cores.
+                let perCore = cpuNs / (now.timeIntervalSince(last) * 1e9) * 100
+                job.cpuPercent = min(100, max(0, perCore / Double(Self.coreCount)))
             }
             job.lastCPUTime = usage.cpuNs
             job.lastSampleAt = now
@@ -627,6 +637,14 @@ final class Store {
         let ticks = info.ri_user_time + info.ri_system_time  // mach units (125/3 ns on Apple Silicon)
         let ns = ticks * UInt64(timebase.numer) / UInt64(timebase.denom)
         return (ns, info.ri_phys_footprint)
+    }
+
+    nonisolated static let coreCount = max(1, ProcessInfo.processInfo.activeProcessorCount)
+
+    /// Bytes → share of physical memory, 0–100.
+    nonisolated static func memoryShare(_ bytes: UInt64) -> Double {
+        let total = Double(ProcessInfo.processInfo.physicalMemory)
+        return total > 0 ? min(100, Double(bytes) / total * 100) : 0
     }
 
     nonisolated static func sysctlInt(_ name: String) -> Int? {
