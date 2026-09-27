@@ -8,9 +8,9 @@ GLB Print Prep has two parts:
 
 ## Repair
 
-1. **Diagnosis** — read the GLB container and JSON, list compression extensions
+1. **Diagnosis.** Read the GLB container and JSON, list compression extensions
    (`EXT_meshopt_compression`, `KHR_mesh_quantization`, `KHR_draco_mesh_compression`) and structural
-   problems (e.g. meshopt fallback buffers without data — the cause of "Invalid byteLength" errors).
+   problems (for example meshopt fallback buffers without data, which cause "Invalid byteLength" errors).
    Files without compression are reported as `SKIP` and left alone.
 2. **Decode** with glTF-Transform plus the meshoptimizer and Draco decoders.
 3. **Convert** to standard glTF: `dequantize()` (quantized attributes → float), `unpartition()` (one
@@ -30,24 +30,24 @@ compression extension) and only then moves the original to the Trash (restorable
 
 ## Print optimization
 
-The goal: the fewest triangles such that the printed surface can't differ from the original by more than
-the printer can resolve.
+The engine looks for the smallest number of triangles for which the surface stays within the printer's
+resolution of the original.
 
-1. **Scale.** glTF has no real-world units for miniatures, so the engine detects the base: it takes the
+1. **Scale.** A glTF file doesn't say how large the printed miniature will be, so the engine detects the base: it takes the
    lowest 3 % of the model's height; if that slice is round (extent ratio > 0.85) its diameter is the base,
    otherwise the largest horizontal extent is used. `mm per unit = base diameter (mm) / base (units)`.
-2. **Tolerance** in millimetres from the print profile, `min(layer × a, nozzle × b)` — see the table in the
+2. **Tolerance** in millimetres from the print profile, `min(layer × a, nozzle × b)`; see the table in the
    README. With a 0.2 mm nozzle and 0.08 mm layers, "high" is 0.02 mm.
 3. **Simplification** with meshoptimizer's `simplifyWithUpdate` (quadric error metric with optimal vertex
    placement, normals/UV/colour as weighted attributes), followed by:
-   - **fin removal** — meshopt can collapse two sides of a thin part into coincident, opposite triangles
+   - **Fin removal.** Meshopt can collapse two sides of a thin part into coincident, opposite triangles
      (zero-thickness "fins"); both are removed, exact duplicates are reduced to one;
-   - **pinch protection** — if simplification creates new non-manifold edges, the involved vertices and
+   - **Pinch protection.** If simplification creates new non-manifold edges, the involved vertices and
      their 2-ring neighbourhood are locked and the primitive is simplified again (up to 4 rounds).
-4. **Measurement** — symmetric Hausdorff distance between the original and simplified surfaces:
+4. **Measurement.** Symmetric Hausdorff distance between the original and simplified surfaces:
    150,000 area-weighted samples on each side (deterministic seeds), point-to-triangle distance on a uniform
    grid with cell pruning. Max, mean and 99th percentile are reported in millimetres.
-5. **Search** — start at 300k triangles, then a bracketing search that uses the empirical relation
+5. **Search.** Start at 300k triangles, then a bracketing search that uses the empirical relation
    `deviation ∝ triangles^-0.6` to aim at 92 % of the tolerance, with steps of at most 2×, until the bracket
    is within 12 %. Bounds: at least 20k and at most the cap (1M by default). Up to two correction rounds.
 6. **Final tests**: topology (no new boundary or non-manifold edges compared with the input), Khronos

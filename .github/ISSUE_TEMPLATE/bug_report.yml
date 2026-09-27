@@ -4,7 +4,7 @@ labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Thanks for taking the time to report a problem! Please never attach models you are not allowed to share.
+      value: Please don't attach models you are not allowed to share.
   - type: textarea
     id: what
     attributes:

@@ -1,11 +1,11 @@
 # Contributing
 
-Thanks for helping! Issues, ideas and pull requests are all welcome.
+Issues and pull requests are welcome. This page explains how the project is organized and how to build and test it.
 
 ## Project layout
 
 ```
-engine/   Node.js engine and CLI (glTF-Transform, meshoptimizer, Draco) — runs on any OS
+engine/   Node.js engine and CLI (glTF-Transform, meshoptimizer, Draco), runs on any OS
 app/      macOS SwiftUI app (Swift package: GLBPrintPrepCore library + GLBPrintPrep executable)
 docs/     Documentation
 ```
@@ -30,7 +30,7 @@ The app runs the engine as a child process and reads NDJSON progress events from
 
 ## Guidelines
 
-- Keep the engine's promise: **inputs are never modified or deleted by the engine**; outputs are written
+- The engine must never modify or delete input files. Outputs are written
   atomically and verified. Only the app moves files to the Trash, and only after its own independent check.
 - New engine behaviour needs a test in `engine/test/` (synthetic fixtures live in `test/fixtures.mjs`;
   please don't commit binary models).

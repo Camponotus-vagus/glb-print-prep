@@ -5,14 +5,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-## [1.0.0] — 2026-09-27
+## [1.0.0] - 2026-09-27
 
 First public release.
 
 ### Added
-- **Repair** of GLB files compressed with meshopt, mesh quantization or Draco into standard GLB, verified by
+- Repair of GLB files compressed with meshopt, mesh quantization or Draco into standard GLB, verified by
   five independent tests before the original is moved to the Trash (always restorable).
-- **Print optimization**: adaptive triangle reduction within a measured tolerance in millimetres
+- Print optimization: adaptive triangle reduction within a measured tolerance in millimetres
   (symmetric Hausdorff distance), derived from nozzle diameter and layer height, with automatic detection of
   the round base for real-world scale, fin removal and protection against non-manifold pinches.
 - Native macOS app (SwiftUI, RealityKit, Liquid Glass): drag & drop of files and folders, parallel batch

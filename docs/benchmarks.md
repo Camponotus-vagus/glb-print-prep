@@ -24,7 +24,7 @@ Search trace for miniature A:
 Bambu Studio's "Simplify model" (`its_quadric_edge_collapse`) uses fixed quadric-error thresholds per
 detail level, expressed in model units rather than printed millimetres, and does not measure the result or
 check for holes. On miniature A, "Extra high" produced 133,529 triangles. GLB Print Prep produced
-124,037 triangles — 7 % fewer — with a *measured* maximum deviation of 0.018 mm and unchanged topology.
+124,037 triangles (7% fewer) with a measured maximum deviation of 0.018 mm and unchanged topology.
 
 ## Repair
 
