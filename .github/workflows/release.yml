@@ -36,7 +36,7 @@ jobs:
           ZIP="dist/GLB-Print-Prep-${VERSION}-macOS-arm64.zip"
           ditto -c -k --sequesterRsrc --keepParent "dist/GLB Print Prep.app" "$ZIP"
           (cd engine && npm pack --pack-destination ../dist)
-          shasum -a 256 dist/*.zip dist/*.tgz > dist/SHA256SUMS.txt
+          (cd dist && shasum -a 256 *.zip *.tgz > SHA256SUMS.txt)
           echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub release
