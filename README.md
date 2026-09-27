@@ -136,6 +136,16 @@ edges, and adjusts the triangle count until the measured difference sits just un
 - Only triangle meshes are simplified. Point clouds and lines are copied unchanged.
 - The app is not notarized by Apple yet (see Install).
 
+## About this project
+
+I'm not a software developer. I'm an entomologist, and 3D printing is one of my hobbies. I built GLB Print
+Prep with the help of AI: most of the code was written by Claude, Anthropic's AI assistant, following my
+requirements and my tests on real models and prints.
+
+Because of that, the project relies on automated tests, independent checks of every output file and CI on
+three operating systems, and the app never deletes your files (it only moves them to the Trash). If you
+find a bug or something that looks wrong in the code, please open an issue.
+
 ## Support
 
 GLB Print Prep is free and open source. If you find it useful, you can support its development on
