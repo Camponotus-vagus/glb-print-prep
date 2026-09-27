@@ -107,7 +107,8 @@ More in [docs/benchmarks.md](docs/benchmarks.md).
 ## Support the project
 
 GLB Print Prep is free and open source. If it saves you time or filament, you can support its
-development through [GitHub Sponsors](https://github.com/sponsors/Camponotus-vagus) — thank you!
+development through [GitHub Sponsors](https://github.com/sponsors/Camponotus-vagus) or
+[Ko-fi](https://ko-fi.com/zermat) — thank you!
 Starring the repository and reporting issues helps too.
 
 ## Contributing

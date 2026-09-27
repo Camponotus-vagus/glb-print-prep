@@ -6,6 +6,6 @@ public enum ProjectLinks {
     public static let issues = URL(string: "https://github.com/Camponotus-vagus/glb-print-prep/issues/new/choose")!
     public static let releases = URL(string: "https://github.com/Camponotus-vagus/glb-print-prep/releases")!
     public static let githubSponsors = URL(string: "https://github.com/sponsors/Camponotus-vagus")!
-    /// Set to the Ko-fi page once it exists (e.g. "https://ko-fi.com/yourname"); hidden while nil.
-    public static let koFi: URL? = nil
+    /// Ko-fi page (one-off and monthly tips); the UI hides the entry when nil.
+    public static let koFi: URL? = URL(string: "https://ko-fi.com/zermat")
 }
