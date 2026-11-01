@@ -51,7 +51,7 @@
     "@gltf-transform/core": "^4.5.0",
     "@gltf-transform/extensions": "^4.5.0",
     "@gltf-transform/functions": "^4.5.0",
-    "draco3dgltf": "^1.5.7",
+    "draco3dgltf": "^1.5.9",
     "gltf-validator": "^2.0.0-dev.3.10",
     "meshoptimizer": "^1.3.0"
   },
